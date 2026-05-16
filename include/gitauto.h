@@ -88,6 +88,10 @@ int cmd_branch(int argc, char **argv);
 int gitauto_checkout(const char *branch, bool quiet);
 int cmd_checkout(int argc, char **argv);
 
+/* backup */
+int gitauto_backup(bool quiet);
+int cmd_backup(int argc, char **argv);
+
 /* ssh-agent */
 int gitauto_ensure_ssh_key(void);
 
