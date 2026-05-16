@@ -28,6 +28,7 @@ static Command commands[] = {
     {"branch", "br", cmd_branch},
     {"checkout", "co", cmd_checkout},
     {"backup", "b", cmd_backup},
+    {"open", "o", cmd_open},
     {NULL, NULL, NULL}  /* sentinel */
 };
 

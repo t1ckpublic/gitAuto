@@ -68,7 +68,7 @@ static int gitauto_backup_core(bool quiet) {
     git_run("git add -A", true);
 
     /* ---------------- 2. commit snapshot ---------------- */
-    git_run("git commit -m \"gitauto backup snapshot\"", true);
+    git_run("git commit -m \"gitAuto backup snapshot\"", true);
 
     /* ---------------- 3. refresh remote info ---------------- */
     git_run("git fetch origin", true);

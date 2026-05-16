@@ -95,4 +95,8 @@ int cmd_backup(int argc, char **argv);
 /* ssh-agent */
 int gitauto_ensure_ssh_key(void);
 
+/* open */
+int gitauto_open(bool quiet);
+int cmd_open(int argc, char **argv);
+
 #endif

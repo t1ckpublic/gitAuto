@@ -20,6 +20,7 @@ SRC = \
     src/feature/branch.c \
     src/feature/checkout.c \
     src/feature/backup.c \
+    src/feature/open.c \
     src/utils/env.c
 
 all: $(OUT) $(ALIAS)
