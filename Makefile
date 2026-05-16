@@ -21,6 +21,7 @@ SRC = \
     src/feature/checkout.c \
     src/feature/backup.c \
     src/feature/open.c \
+    src/feature/version.c \
     src/utils/env.c
 
 all: $(OUT) $(ALIAS)

@@ -99,4 +99,8 @@ int gitauto_ensure_ssh_key(void);
 int gitauto_open(bool quiet);
 int cmd_open(int argc, char **argv);
 
+/* version */
+int gitauto_version(bool quiet);
+int cmd_version(int argc, char **argv);
+
 #endif
