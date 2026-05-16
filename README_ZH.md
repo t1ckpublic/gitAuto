@@ -262,13 +262,3 @@ MIT License
 * 冲突解决辅助工具
 * Linux / macOS 支持
 * 插件系统（自定义 workflow 扩展）
-
----
-
-如果你下一步想再升级，我可以帮你把 README 直接进化成：
-
-* GitHub 项目首页级别（带 badge + stats + logo）
-* 或者 CLI 工具“官网风格文档”（类似 ripgrep / neovim 风格）
-* 甚至可以帮你做一个 `docs/` + Docusaurus 结构版
-
-只要你想把它做成“能发 GitHub star 的工具”，我可以帮你继续往那个级别打磨。
