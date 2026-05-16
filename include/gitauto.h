@@ -76,6 +76,10 @@ int cmd_watch(int argc, char **argv);
 int gitauto_link(const char *url, bool quiet);
 int cmd_link(int argc, char **argv);
 
+/* clone */
+int gitauto_clone(const char *url, bool quiet);
+int cmd_clone(int argc, char **argv);
+
 /* ssh-agent */
 int gitauto_ensure_ssh_key(void);
 

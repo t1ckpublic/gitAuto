@@ -9,7 +9,7 @@
 
 
 /* Command definition with aliases support */
-typedef int (*command_func)(int argc, char **argv);   // 加了这行
+typedef int (*command_func)(int argc, char **argv);
 typedef struct {
     const char *name;
     const char *alias;    /* single character alias or NULL */
@@ -24,6 +24,7 @@ static Command commands[] = {
     {"link",  "l", cmd_link},
     {"pull",  "pl", cmd_pull},
     {"sync",  "s", cmd_sync},
+    {"clone", "c", cmd_clone},
     {NULL, NULL, NULL}  /* sentinel */
 };
 

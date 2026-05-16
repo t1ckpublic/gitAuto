@@ -1,6 +1,9 @@
 CC = gcc
 CFLAGS = -Iinclude -Wall -O2
-OUT = build/gitAuto.exe
+
+OUT_DIR = build
+OUT = $(OUT_DIR)/gitAuto.exe
+ALIAS = $(OUT_DIR)/ga.exe
 
 SRC = \
     src/gitauto.c \
@@ -12,13 +15,17 @@ SRC = \
     src/feature/link.c \
     src/feature/pull.c \
     src/feature/sync.c \
+    src/feature/clone.c \
     src/utils/env.c
 
-all: $(OUT)
+all: $(OUT) $(ALIAS)
 
 $(OUT): $(SRC)
-	mkdir -p build
+	mkdir -p $(OUT_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
+$(ALIAS): $(OUT)
+	cp $(OUT) $(ALIAS)
+
 clean:
-	rm -rf build
+	rm -rf $(OUT_DIR)
