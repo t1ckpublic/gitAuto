@@ -69,3 +69,29 @@ void watch_loop(bool quiet) {
         }
     }
 }
+
+/* ---------------- handler ---------------- */
+int CMD_WATCH(int argc, char **argv)
+{
+    bool quiet = false;
+
+    for (int i = 2; i < argc; i++) {
+        if (!strcmp(argv[i], "--quiet") ||
+            !strcmp(argv[i], "-q"))
+        {
+            quiet = true;
+        }
+    }
+
+    if (!is_git_repo()) {
+        log_error("not a git repository");
+        return 1;
+    }
+
+    ensure_config();
+    ensure_gitignore();
+    load_config(&g_cfg);
+    git_run("git pull", quiet);
+    watch_loop(quiet);
+    return 0;
+}

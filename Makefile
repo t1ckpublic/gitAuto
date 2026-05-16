@@ -2,7 +2,14 @@ CC = gcc
 CFLAGS = -Iinclude -Wall -O2
 OUT = build/gitAuto.exe
 
-SRC = src/gitauto.c src/feature/feature_common.c src/feature/feature_init.c src/feature/feature_push.c src/feature/feature_watch.c src/feature/feature_sshagent.c src/utils/env.c
+SRC = \
+    src/gitauto.c \
+    src/feature/common.c \
+    src/feature/init.c \
+    src/feature/push.c \
+    src/feature/watch.c \
+    src/feature/sshagent.c \
+    src/utils/env.c
 
 all: $(OUT)
 
