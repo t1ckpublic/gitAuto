@@ -24,6 +24,8 @@ SRC = \
     src/feature/open.c \
     src/feature/version.c \
     src/feature/ignore.c \
+    src/feature/save.c \
+    src/feature/restore.c \
     src/utils/env.c
 
 all: $(OUT) $(ALIAS)

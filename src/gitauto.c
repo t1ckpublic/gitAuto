@@ -31,6 +31,8 @@ static Command commands[] = {
     {"open", "o", cmd_open},
     {"version", "v", cmd_version},
     {"ignore", "ig", cmd_ignore},
+    {"save", "sv", cmd_save},
+    {"restore", "re", cmd_restore},
     {NULL, NULL, NULL}  /* sentinel */
 };
 
