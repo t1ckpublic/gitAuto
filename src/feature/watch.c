@@ -71,7 +71,7 @@ void watch_loop(bool quiet) {
 }
 
 /* ---------------- handler ---------------- */
-int CMD_WATCH(int argc, char **argv)
+int cmd_watch(int argc, char **argv)
 {
     bool quiet = false;
 

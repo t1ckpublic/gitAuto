@@ -7,27 +7,22 @@
 #include <signal.h>
 #include <time.h>
 
-/* Command types */
-typedef enum {
-    CMD_INIT,
-    CMD_PUSH,
-    CMD_WATCH,
-} CommandType;
 
 /* Command definition with aliases support */
-typedef int (*command_func)(int argc, char **argv);
+typedef int (*command_func)(int argc, char **argv);   // 加了这行
 typedef struct {
     const char *name;
     const char *alias;    /* single character alias or NULL */
-    CommandType type;
+    command_func func;
 } Command;
 
 /* Command table */
 static Command commands[] = {
-    {"init",  "i", CMD_INIT},
-    {"push",  "p", CMD_PUSH},
-    {"watch", "w", CMD_WATCH},
-    {NULL, NULL, -1}  /* sentinel */
+    {"init",  "i", cmd_init},
+    {"push",  "p", cmd_push},
+    {"watch", "w", cmd_watch},
+    {"link",  "l", cmd_link},
+    {NULL, NULL, NULL}  /* sentinel */
 };
 
 /* Find command by name or alias */
@@ -63,80 +58,22 @@ static void on_sig(int _) {
     running = 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     signal(SIGINT, on_sig);
 
-    bool quiet = false;
-    Command *cmd = NULL;
-
-    if (argc == 1) {
+    if (argc < 2) {
         print_usage();
         return 0;
     }
 
-    /* Parse command and options */
-    for (int i = 1; i < argc; i++) {
-        if (cmd == NULL) {
-            /* First non-option argument should be command */
-            cmd = find_command(argv[i]);
-            if (cmd == NULL && argv[i][0] != '-') {
-                printf("unknown command: %s\n", argv[i]);
-                print_usage();
-                return 1;
-            }
-            if (cmd != NULL) {
-                continue;
-            }
-        }
-        
-        /* Handle options */
-        if (strcmp(argv[i], "--quiet") == 0 || strcmp(argv[i], "-q") == 0) {
-            quiet = true;
-        } else if (argv[i][0] == '-') {
-            printf("unknown option: %s\n", argv[i]);
-            print_usage();
-            return 1;
-        }
-    }
+    Command *cmd = find_command(argv[1]);
 
-    if (cmd == NULL) {
-        printf("no command specified\n");
-        print_usage();
+    if (!cmd) {
+        printf("unknown command: %s\n", argv[1]);
         return 1;
     }
 
-    /* Execute command */
-    switch (cmd->type) {
-        case CMD_INIT:
-            return gitauto_init();
-        
-        case CMD_PUSH: {
-            if (!is_git_repo()) {
-                log_error("not a git repository");
-                return 1;
-            }
-            ensure_config();
-            ensure_gitignore();
-            load_config(&g_cfg);
-            return gitauto_push(quiet);
-        }
-        
-        case CMD_WATCH: {
-            if (!is_git_repo()) {
-                log_error("not a git repository");
-                return 1;
-            }
-            ensure_config();
-            ensure_gitignore();
-            load_config(&g_cfg);
-            git_run("git pull", quiet);
-            watch_loop(quiet);
-            return 0;
-        }
-        
-        default:
-            printf("unknown command type\n");
-            return 1;
-    }
+    return cmd->func(argc, argv);
 }
 

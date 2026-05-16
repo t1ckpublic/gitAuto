@@ -39,14 +39,26 @@ void ensure_gitignore(void);
 
 /* init */
 int gitauto_init(void);
+int cmd_init(int argc, char **argv);
 
 /* push */
 int gitauto_push(bool quiet);
+int cmd_push(int argc, char **argv);
 
 /* watch */
 void watch_loop(bool quiet);
+int cmd_watch(int argc, char **argv);
+
+/* link */
+int gitauto_link(const char *url, bool quiet);
+int cmd_link(int argc, char **argv);
 
 /* ssh-agent */
 int gitauto_ensure_ssh_key(void);
+
+
+
+
+
 
 #endif

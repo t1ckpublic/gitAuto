@@ -111,7 +111,7 @@ int gitauto_init(void)
 }
 
 /* ---------------- handler ---------------- */
-int CMD_INIT(int argc, char **argv)
+int cmd_init(int argc, char **argv)
 {
     return gitauto_init();
 }
