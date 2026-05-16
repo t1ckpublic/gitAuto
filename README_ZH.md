@@ -1,6 +1,6 @@
 <div align="center">
 
-# gitAuto - 轻量化 Git 自动化工具
+# gitAuto - 轻量 Git 自动化工具
 
 
 <img src="https://img.shields.io/badge/gitauto-lightweight%20git%20automation-red?style=for-the-badge"/>
