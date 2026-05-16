@@ -103,4 +103,8 @@ int cmd_open(int argc, char **argv);
 int gitauto_version(bool quiet);
 int cmd_version(int argc, char **argv);
 
+/*ignore*/
+int gitauto_ignore_node(bool quiet);
+int cmd_ignore(int argc, char **argv);
+
 #endif

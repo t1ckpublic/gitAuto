@@ -128,22 +128,54 @@ void load_config(Config *cfg) {
 /* ---------------- gitignore ---------------- */
 
 void ensure_gitignore(void) {
+
     FILE *f = fopen(GITIGNORE_PATH, "r");
     if (f) {
+
         char buf[1024];
         while (fgets(buf, sizeof(buf), f)) {
+
             if (strstr(buf, ">>> gitAuto")) {
                 fclose(f);
                 return;
             }
         }
+
         fclose(f);
     }
 
     f = fopen(GITIGNORE_PATH, "a");
+    if (!f) return;
+
     fprintf(f,
         "\n# >>> gitAuto\n"
+        "# core\n"
         "gitAuto.exe\n"
+        "\n"
+        "# templates\n"
+        "# (managed by gitauto ignore)\n"
+        "\n"
         "# <<< gitAuto\n");
+
     fclose(f);
 }
+// void ensure_gitignore(void) {
+//     FILE *f = fopen(GITIGNORE_PATH, "r");
+//     if (f) {
+//         char buf[1024];
+//         while (fgets(buf, sizeof(buf), f)) {
+//             if (strstr(buf, ">>> gitAuto")) {
+//                 fclose(f);
+//                 return;
+//             }
+//         }
+//         fclose(f);
+//     }
+
+//     f = fopen(GITIGNORE_PATH, "a");
+//     fprintf(f,
+//         "\n# >>> gitAuto\n"
+//         "gitAuto.exe\n"
+//         "# <<< gitAuto\n");
+//     fclose(f);
+// }

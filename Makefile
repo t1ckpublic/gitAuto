@@ -1,6 +1,7 @@
 CC = gcc
 CFLAGS = -Iinclude -Wall -O2
 CFLAGS += -Wno-format-truncation
+CFLAGS += -Wno-unused-function
 
 OUT_DIR = build
 OUT = $(OUT_DIR)/gitAuto.exe
@@ -22,6 +23,7 @@ SRC = \
     src/feature/backup.c \
     src/feature/open.c \
     src/feature/version.c \
+    src/feature/ignore.c \
     src/utils/env.c
 
 all: $(OUT) $(ALIAS)
