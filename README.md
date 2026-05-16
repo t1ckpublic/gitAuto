@@ -1,13 +1,21 @@
-![GitAuto](https://img.shields.io/badge/gitauto-lightweight%20git%20automation-red?style=for-the-badge)
+<div align="center">
 
-![Windows Only](https://img.shields.io/badge/platform-Windows-blue?logo=windows)
-![Language](https://img.shields.io/badge/language-C/C++-informational?logo=c)
-![Tool](https://img.shields.io/badge/tool-git%20automation-orange?logo=git)
-![Status](https://img.shields.io/badge/status-active-success)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
+# gitAuto - Lightweight git Automation Tool
+#### [中文README](README_ZH.md)
 
-# gitAuto
+
+<img src="https://img.shields.io/badge/gitauto-lightweight%20git%20automation-red?style=for-the-badge"/>
+
+<br/>
+
+<img src="https://img.shields.io/badge/platform-Windows-blue?logo=windows"/>
+<img src="https://img.shields.io/badge/language-C-informational?logo=c"/>
+<img src="https://img.shields.io/badge/tool-git%20automation-orange?logo=git"/>
+<img src="https://img.shields.io/badge/status-active-success"/>
+<img src="https://img.shields.io/badge/license-MIT-green"/>
+
+</div>
+<br>
 
 `gitAuto` is a **Lightweight Git Automation CLI Tool (Windows only)**
 designed to simplify repetitive Git workflows such as commit, push, pull, and repository management.
