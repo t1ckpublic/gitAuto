@@ -80,6 +80,14 @@ int cmd_link(int argc, char **argv);
 int gitauto_clone(const char *url, bool quiet);
 int cmd_clone(int argc, char **argv);
 
+/* branch */
+int gitauto_branch(bool quiet);
+int cmd_branch(int argc, char **argv);
+
+/* checkout */
+int gitauto_checkout(const char *branch, bool quiet);
+int cmd_checkout(int argc, char **argv);
+
 /* ssh-agent */
 int gitauto_ensure_ssh_key(void);
 

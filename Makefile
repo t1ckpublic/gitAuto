@@ -16,6 +16,8 @@ SRC = \
     src/feature/pull.c \
     src/feature/sync.c \
     src/feature/clone.c \
+    src/feature/branch.c \
+    src/feature/checkout.c \
     src/utils/env.c
 
 all: $(OUT) $(ALIAS)

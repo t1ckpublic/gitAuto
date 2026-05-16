@@ -25,6 +25,8 @@ static Command commands[] = {
     {"pull",  "pl", cmd_pull},
     {"sync",  "s", cmd_sync},
     {"clone", "c", cmd_clone},
+    {"branch", "br", cmd_branch},
+    {"checkout", "co", cmd_checkout},
     {NULL, NULL, NULL}  /* sentinel */
 };
 
