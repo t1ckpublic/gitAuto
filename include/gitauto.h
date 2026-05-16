@@ -13,6 +13,7 @@ typedef struct {
     char blacklist[512];
 } Config;
 
+
 /* global variables */
 extern Config g_cfg;
 extern volatile int running;
@@ -42,7 +43,15 @@ int gitauto_init(void);
 int cmd_init(int argc, char **argv);
 
 /* push */
-int gitauto_push(bool quiet);
+typedef struct {
+    bool quiet;
+
+    bool force_with_lease;
+    bool force;
+
+    const char *message;
+} PushOptions;
+int gitauto_push(PushOptions *opt);
 int cmd_push(int argc, char **argv);
 
 /* watch */
