@@ -54,6 +54,20 @@ typedef struct {
 int gitauto_push(PushOptions *opt);
 int cmd_push(int argc, char **argv);
 
+/* pull */
+typedef struct {
+    bool quiet;
+
+    bool force;
+    bool clean;
+} PullOptions;
+int gitauto_pull(PullOptions *opt);
+int cmd_pull(int argc, char **argv);
+
+/* sync */
+int gitauto_sync(bool quiet);
+int cmd_sync(int argc, char **argv);
+
 /* watch */
 void watch_loop(bool quiet);
 int cmd_watch(int argc, char **argv);
@@ -64,10 +78,5 @@ int cmd_link(int argc, char **argv);
 
 /* ssh-agent */
 int gitauto_ensure_ssh_key(void);
-
-
-
-
-
 
 #endif

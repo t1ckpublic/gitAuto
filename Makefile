@@ -10,6 +10,8 @@ SRC = \
     src/feature/watch.c \
     src/feature/sshagent.c \
     src/feature/link.c \
+    src/feature/pull.c \
+    src/feature/sync.c \
     src/utils/env.c
 
 all: $(OUT)

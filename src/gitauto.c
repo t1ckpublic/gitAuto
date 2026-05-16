@@ -22,6 +22,8 @@ static Command commands[] = {
     {"push",  "p", cmd_push},
     {"watch", "w", cmd_watch},
     {"link",  "l", cmd_link},
+    {"pull",  "pl", cmd_pull},
+    {"sync",  "s", cmd_sync},
     {NULL, NULL, NULL}  /* sentinel */
 };
 
@@ -41,14 +43,30 @@ static Command* find_command(const char *arg) {
 void print_usage(void)
 {
     printf(
-        "gitauto - lightweight git automation tool\n"
+        "gitAuto - lightweight git automation tool\n"
         "\n"
         "Usage:\n"
-        "  gitauto init/i             Initialize git repository\n"
-        "  gitauto push/p             Commit & push immediately\n"
-        "  gitauto watch/w            Auto push on file changes\n"
-        "  gitauto watch/w --quiet    Auto push with minimal output\n"
+        "  gitauto init/i                   Initialize git repository, commit & push first version\n"
+        "  gitauto link/l                   Bind remote repository (set origin + fetch)\n"
         "\n"
+        "  gitauto push/p                   Smart push (pull --rebase + add + commit + push)\n"
+        "  gitauto push -m <msg>            Commit with custom message\n"
+        "  gitauto push -f                  Force push (safe mode: --force-with-lease)\n"
+        "  gitauto push -ff                 Dangerous force push (--force)\n"
+        "\n"
+        "  gitauto pull/pl                  Smart pull (rebase + autostash)\n"
+        "  gitauto pull -f                  Hard sync (reset to origin, discard local changes)\n"
+        "  gitauto pull -ff                 Full reset (clean + hard reset to origin)\n"
+        "\n"
+        "  gitauto watch/w                  Auto sync on file changes (push on change)\n"
+        "  gitauto watch/w -q               Quiet mode (minimal output)\n"
+        "\n"
+        "  gitauto sync/s                   Pull + push (full bidirectional sync)\n"
+        "\n"
+        "Notes:\n"
+        "  - All commands use current branch unless specified\n"
+        "  - -f and -ff are destructive operations\n"
+        "  - watch mode continuously monitors working directory\n"
     );
 }
 
