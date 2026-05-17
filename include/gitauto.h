@@ -115,4 +115,13 @@ int cmd_save(int argc, char **argv);
 int gitauto_restore(const char *target, bool apply, bool quiet);
 int cmd_restore(int argc, char **argv);
 
+/* clean */
+int cmd_clean(int argc, char **argv);
+
+/* undo */
+int cmd_undo(int argc, char **argv);
+
+/* amend */
+int cmd_amend(int argc, char **argv);
+
 #endif

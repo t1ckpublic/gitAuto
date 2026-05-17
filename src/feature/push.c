@@ -40,6 +40,20 @@ static int get_current_branch(char *buf, size_t size) {
 
     return 0;
 }
+/* ---------------- helper ---------------- */
+
+static bool has_working_changes(void) {
+
+    int ret1 = system(
+        "git diff --quiet >nul 2>nul"
+    );
+
+    int ret2 = system(
+        "git diff --cached --quiet >nul 2>nul"
+    );
+
+    return ret1 != 0 || ret2 != 0;
+}
 
 /* ---------------- commit ---------------- */
 
@@ -84,6 +98,12 @@ int gitauto_push(PushOptions *opt) {
     }
 
     bool need_upstream = !has_upstream();
+
+    if (!has_working_changes()) {
+
+    log_warn("nothing to commit");
+    return 0;
+    }
 
     if (need_upstream) {
         log_warn("no upstream branch, will configure automatically");
