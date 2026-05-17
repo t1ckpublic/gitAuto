@@ -24,14 +24,9 @@ static int branch_exists_remote(const char *branch) {
 }
 
 static int get_current_branch(char *buf, size_t size) {
-    FILE *fp = popen(
-        "git branch --show-current",
-        "r"
-    );
+    FILE *fp = popen("git branch --show-current", "r");
 
-    if (!fp) {
-        return 1;
-    }
+    if (!fp) return 1;
 
     if (!fgets(buf, size, fp)) {
         pclose(fp);
@@ -41,19 +36,21 @@ static int get_current_branch(char *buf, size_t size) {
     pclose(fp);
 
     buf[strcspn(buf, "\r\n")] = 0;
-
     return 0;
 }
 
-/* ---------------- core ---------------- */
+/* ---------------- core backup ---------------- */
 
 static int gitauto_backup_core(bool quiet) {
 
     char current[128];
-    get_current_branch(current, sizeof(current));
+    if (get_current_branch(current, sizeof(current))) {
+        log_error("cannot get current branch");
+        return 1;
+    }
 
     if (!current[0]) {
-        log_error("cannot get current branch");
+        log_error("invalid branch");
         return 1;
     }
 
@@ -64,29 +61,25 @@ static int gitauto_backup_core(bool quiet) {
 
     char cmd[512];
 
-    /* ---------------- 1. stage changes ---------------- */
+    /* stage */
     git_run("git add -A", true);
 
-    /* ---------------- 2. commit snapshot ---------------- */
+    /* snapshot commit */
     git_run("git commit -m \"gitAuto backup snapshot\"", true);
 
-    /* ---------------- 3. refresh remote info ---------------- */
+    /* sync remote state */
     git_run("git fetch origin", true);
 
     int local_exists  = branch_exists_local(backup);
     int remote_exists = branch_exists_remote(backup);
 
-    /* ---------------- 4. sync logic ---------------- */
-
     if (local_exists && remote_exists) {
 
-        /* update backup branch pointer */
         snprintf(cmd, sizeof(cmd),
                  "git branch -f %s HEAD",
                  backup);
         git_run(cmd, true);
 
-        /* sync remote safely */
         snprintf(cmd, sizeof(cmd),
                  "git push origin %s --force-with-lease",
                  backup);
@@ -94,13 +87,11 @@ static int gitauto_backup_core(bool quiet) {
     }
     else if (!local_exists && remote_exists) {
 
-        /* fetch remote backup first */
         snprintf(cmd, sizeof(cmd),
                  "git checkout -b %s origin/%s",
                  backup, backup);
         git_run(cmd, true);
 
-        /* move to latest HEAD */
         snprintf(cmd, sizeof(cmd),
                  "git branch -f %s HEAD",
                  backup);
@@ -113,7 +104,6 @@ static int gitauto_backup_core(bool quiet) {
     }
     else if (local_exists && !remote_exists) {
 
-        /* only local exists → create remote */
         snprintf(cmd, sizeof(cmd),
                  "git branch -f %s HEAD",
                  backup);
@@ -126,7 +116,6 @@ static int gitauto_backup_core(bool quiet) {
     }
     else {
 
-        /* brand new backup branch */
         snprintf(cmd, sizeof(cmd),
                  "git branch -f %s HEAD",
                  backup);
@@ -145,16 +134,122 @@ static int gitauto_backup_core(bool quiet) {
     return 0;
 }
 
+/* ---------------- core restore ---------------- */
+static int gitauto_backup_restore_core(
+    const char *target,
+    bool quiet
+) {
+
+    char current[128];
+
+    if (get_current_branch(current, sizeof(current))) {
+        log_error("cannot get current branch");
+        return 1;
+    }
+
+    char from_branch[256];
+
+    /* ---------------- default restore ---------------- */
+    if (!target || target[0] == '\0') {
+
+        snprintf(from_branch, sizeof(from_branch),
+                 "%s-backup",
+                 current);
+    }
+    else {
+
+        /* restore from arbitrary branch */
+        snprintf(from_branch, sizeof(from_branch),
+                 "%s",
+                 target);
+    }
+
+    /* ---------------- existence check ---------------- */
+    if (!branch_exists_local(from_branch)) {
+        log_error("branch not found: %s", from_branch);
+        return 1;
+    }
+
+    char cmd[512];
+
+    /* ---------------- IMPORTANT ----------------
+     * reset CURRENT branch
+     * do NOT checkout target
+     * ------------------------------------------ */
+
+    /* restore snapshot */
+    snprintf(cmd, sizeof(cmd),
+            "git reset --hard refs/heads/%s",
+            from_branch);
+
+    if (git_run(cmd, quiet) != 0) {
+        return 1;
+    }
+
+    /* force sync restore */
+    snprintf(cmd, sizeof(cmd),
+            "git push --force-with-lease");
+
+    if (git_run(cmd, quiet) != 0) {
+        return 1;
+    }
+
+    if (!quiet) {
+        printf(
+            "[gitAuto] restore synced from %s\n",
+            from_branch
+        );
+    }
+
+    return 0;
+
+    /* create restore checkpoint */
+    git_run(
+        "git commit --allow-empty "
+        "-m \"gitAuto restore snapshot\"",
+        true
+    );
+
+    return 0;
+}
+
 /* ---------------- handler ---------------- */
 
 int cmd_backup(int argc, char **argv) {
 
+    bool assume_yes = false;
     bool quiet = false;
 
+    /* action */
+    int is_restore = 0;
+    const char *target = NULL;
+
     for (int i = 2; i < argc; i++) {
+
         if (!strcmp(argv[i], "-q") ||
             !strcmp(argv[i], "--quiet")) {
+
             quiet = true;
+        }
+
+        /* skip confirm */
+        else if (!strcmp(argv[i], "-y") ||
+                 !strcmp(argv[i], "--yes")) {
+
+            assume_yes = true;
+        }
+
+        /* alias: restore / re */
+        else if (!strcmp(argv[i], "restore") ||
+                 !strcmp(argv[i], "re")) {
+
+            is_restore = 1;
+        }
+
+        /* target branch */
+        else {
+
+            target = argv[i];
         }
     }
 
@@ -165,6 +260,39 @@ int cmd_backup(int argc, char **argv) {
 
     ensure_config();
     load_config(&g_cfg);
+
+    /* ---------------- confirm dangerous op ---------------- */
+
+    if (is_restore && !assume_yes) {
+
+        char answer[16];
+
+        printf(
+            "[WARN] restore will overwrite current branch\n"
+            "[WARN] and force push remote history\n"
+            "continue? (y/N): "
+        );
+
+        if (!fgets(answer, sizeof(answer), stdin)) {
+            return 1;
+        }
+
+        if (answer[0] != 'y' &&
+            answer[0] != 'Y') {
+
+            printf("cancelled\n");
+            return 1;
+        }
+    }
+
+    /* ---------------- dispatch ---------------- */
+
+    if (is_restore) {
+        return gitauto_backup_restore_core(
+            target,
+            quiet
+        );
+    }
 
     return gitauto_backup_core(quiet);
 }
