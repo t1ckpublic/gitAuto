@@ -5,11 +5,12 @@
 
 <img src="https://img.shields.io/badge/gitauto-lightweight%20git%20automation-red?style=for-the-badge"/>
 
+
 <br/>
 
 <img src="https://img.shields.io/badge/platform-Windows-blue?logo=windows"/>
 <img src="https://img.shields.io/badge/language-C-informational?logo=c"/>
-<img src="https://img.shields.io/badge/tool-git%20automation-orange?logo=git"/>
+<img src="https://img.shields.io/badge/tool-Git%20Automation-orange?logo=git"/>
 <img src="https://img.shields.io/badge/status-active-success"/>
 <img src="https://img.shields.io/badge/license-MIT-green"/>
 
@@ -19,194 +20,234 @@
 
 `gitAuto` is a **lightweight Git automation CLI tool (Windows only)**.
 
-It does not replace Git. Instead, it provides **minimal wrappers + automation enhancements** for frequent Git workflows, making daily development faster and less mentally demanding.
+It does not replace Git. Instead, it provides a **minimal abstraction layer with workflow automation**, helping developers move faster with less cognitive overhead.
 
 ---
 
-## ⚡ Core Philosophy
+## ⚡ Ultra Minimal Usage!!!
 
-- Reduce and simplify repetitive Git operations
-- Safe by default (dangerous actions are explicitly separated)
-- Keep Git behavior predictable
-- Provide more intuitive command semantics
-- Automate workflows without hiding Git fundamentals
+The ultimate design goal of gitAuto is simple:
+
+> **Reduce Git workflows to near single-keystroke operations.**
+
+With aliases enabled:
+
+```bash
+gitauto push      → ga p
+gitauto checkout  → ga co
+gitauto restore   → ga re
+gitauto branch    → ga br
+````
+
+In daily usage, workflows can even be reduced to:
+
+```bash
+g p   # pull + commit + push
+g w   # auto watch & sync
+g u   # undo changes
+```
+
+👉 **Git operations become muscle memory instead of commands.**
 
 ---
 
 ## 🚀 Feature Overview
 
----
+```
+gitauto init/i                         Initialize repository (init + add + commit + push)
+gitauto clone/c <url>                  Clone repo and initialize workflow
+gitauto link/l <url>                   Bind remote repository (set origin + fetch)
 
-### 🧭 Repository & Basic Operations
+gitauto push/p                         Smart push (pull --rebase + add + commit + push)
+gitauto push/p -m <msg>                Commit with custom message
+gitauto push/p -f                      Safe force push (--force-with-lease)
+gitauto push/p -ff                     Dangerous force push (--force)
 
-| Command | Description |
-|--------|-------------|
-| `gitauto init` | Initialize repo + first commit + push + set upstream |
-| `gitauto clone <url>` | Clone a repository |
-| `gitauto link <url>` | Add origin remote and fetch |
-| `gitauto open` | Open remote repository in browser |
-| `gitauto version` | Show Git and gitAuto version |
+gitauto pull/pl                        Smart pull (rebase + autostash)
+gitauto pull/pl -f                     Hard sync (reset to origin/<branch>)
+gitauto pull/pl -ff                    Full reset (clean + hard reset)
 
----
+gitauto sync/s                         Bidirectional sync (pull + push)
 
-### 🚀 Push & Sync
+gitauto watch/w                        Auto sync on file changes
+gitauto watch/w -q                     Quiet mode (minimal output)
 
-| Command | Description |
-|--------|-------------|
-| `gitauto push` | Smart push (pull + add + commit + push) |
-| `gitauto push -m "msg"` | Custom commit message |
-| `gitauto push -f` | Safe force push (--force-with-lease) |
-| `gitauto push -ff` | Dangerous force push (--force) |
-| `gitauto pull` | Smart pull (rebase + autostash) |
-| `gitauto pull -f` | Force sync to remote |
-| `gitauto pull -ff` | Hard reset local repository |
-| `gitauto sync` | Pull + push synchronization |
+gitauto branch/br                      Show branch list
+gitauto checkout/co <branch>           Switch branch (auto-create if not exists)
 
----
+gitauto backup/b                       Create backup branch snapshot
+gitauto backup/b restore/re            Restore from backup branch
+gitauto backup/b restore/re <branch>   Restore specific snapshot
 
-### 👀 Watch Mode (Auto Sync)
+gitauto save/sv                        Stash working directory (stash push -u)
+gitauto save/sv -m <msg>               Stash with message
 
-| Command | Description |
-|--------|-------------|
-| `gitauto watch` | File watcher with auto sync |
-| `gitauto watch -q` | Quiet background watch mode |
+gitauto restore/re                     Restore latest stash (pop)
+gitauto restore/re -a                  Apply stash (keep stash)
+gitauto restore/re <N>                 Restore stash by index
+gitauto restore/re list/l              List stash entries
 
----
+gitauto clean/cl                       Preview and clean untracked files
+gitauto clean/cl -f                    Force clean untracked files
+gitauto clean/cl -ff                   Deep clean (including ignored files)
 
-### 🌿 Branch Management
+gitauto ignore/ig node                 Add Node.js .gitignore template
+gitauto ignore/ig add <rule>           Append custom ignore rule
 
-| Command | Description |
-|--------|-------------|
-| `gitauto branch` | List branches |
-| `gitauto checkout <branch>` | Switch branch (create if not exists) |
-| `gitauto current` | Show current branch |
+gitauto undo/u                         Undo last commit (soft reset)
+gitauto undo/u mixed/m                 Mixed reset (unstage changes)
+gitauto undo/u hard/h                  Hard reset (discard changes)
+gitauto undo/u <N>                     Undo last N commits
 
----
+gitauto amend/a                        Amend last commit
+gitauto amend -m <msg>                 Amend commit message
 
-### 💾 Stash / Workspace
+gitauto reset/r                        Hard reset to HEAD
+gitauto reset/r <N>                    Reset back N commits
 
-| Command | Description |
-|--------|-------------|
-| `gitauto save` | Stash current changes |
-| `gitauto save -m "msg"` | Stash with message |
-| `gitauto restore` | Pop latest stash |
-| `gitauto restore -a` | Apply stash (keep stash) |
-| `gitauto restore <N>` | Restore specific stash |
-| `gitauto restore list` | List all stashes |
+gitauto current/cur                    Show current branch
+gitauto open/o                         Open remote repository in browser
+gitauto version/v                      Show version info
 
----
-
-### 🧹 Cleanup & Reset
-
-| Command | Description |
-|--------|-------------|
-| `gitauto clean` | Preview and clean untracked files |
-| `gitauto clean -f` | Force clean |
-| `gitauto clean -ff` | Remove ignored + untracked files |
-| `gitauto reset` | Hard reset to HEAD |
-| `gitauto reset <N>` | Reset back N commits |
+gitauto doctor/dr                      Diagnose repository issues
+gitauto doctor/dr -fix/-f              Auto-fix common issues
+```
 
 ---
 
-### ⏪ Undo System
+## 🧠 Command Design Philosophy
 
-| Command | Description |
-|--------|-------------|
-| `gitauto undo` | Soft reset HEAD~1 |
-| `gitauto undo mixed` | Mixed reset |
-| `gitauto undo hard` | Hard reset |
-| `gitauto undo <N>` | Undo N commits |
+### ⚡ Intuitive Semantic System
 
----
+gitAuto is not designed to simply shorten Git commands.
 
-### 🧠 Commit Enhancement
+Instead:
 
-| Command | Description |
-|--------|-------------|
-| `gitauto amend` | Amend last commit |
-| `gitauto amend -m` | Amend commit message |
+> **It replaces Git syntax with human intent.**
 
 ---
 
-### 🧹 Ignore Management
-
-| Command | Description |
-|--------|-------------|
-| `gitauto ignore node` | Add Node.js ignore template |
-| `gitauto ignore add "<rule>"` | Add custom ignore rule |
-
----
-
-### 🧪 Repository Diagnostics
-
-| Command | Description |
-|--------|-------------|
-| `gitauto doctor` | Check repository health |
-| `gitauto doctor -f` | Auto-fix mode |
-
----
-
-## 🧠 Design Philosophy
-
-### push = Automated Sync Model
+### 🚀 push = “sync my current state”
 
 ```bash
 gitauto push
-↓
-git pull --rebase --autostash
-git add .
-git commit
-git push
-````
+```
+
+Not:
+
+* add?
+* commit?
+* pull?
+* rebase?
+
+But a single intent:
+
+> **“I want to synchronize my current state to remote.”**
+
+So gitAuto automatically handles the full workflow pipeline.
 
 ---
 
-### watch = Continuous Development Loop
+### 🌿 checkout = “enter a working state”
+
+```bash
+gitauto checkout <branch>
+```
+
+Not:
+
+* git checkout
+* git switch
+* git branch -b
+
+But:
+
+> **“I want to enter this branch’s working state.”**
+
+If the branch does not exist → it is created automatically.
+
+Because entering a state implies:
+
+> existence is optional, intention is primary.
+
+---
+
+### 💾 save / restore = “pause and resume work”
+
+```bash
+gitauto save
+gitauto restore
+```
+
+Not a stash abstraction.
+
+But:
+
+> **save = pause current work**
+> **restore = resume previous work**
+
+Users don’t need to understand Git stash mechanics—only the mental model:
+
+* pause
+* resume
+
+---
+
+### ⏪ undo = “degree of rollback, not Git parameters”
 
 ```text
-File changes
-→ Auto commit
-→ Auto push
-→ Continue watching
+undo
+undo mixed
+undo hard
 ```
+
+Semantic model:
+
+> Not reset flags, but **how far do I want to go back?**
+
+* soft → keep changes
+* mixed → unstage changes
+* hard → discard everything
+
+👉 Focus is intent, not Git internals.
 
 ---
 
-### undo = Time Rewind System
+### 👀 watch = “enter automated workflow mode”
 
-```text
-soft   → keep staged changes
-mixed  → unstage changes
-hard   → discard everything
+```bash
+gitauto watch
 ```
+
+Not “file watching”.
+
+But:
+
+> **a persistent synchronized working mode**
+
+Meaning:
+
+* enter watch mode
+* system handles sync automatically
+
+No manual Git workflow needed anymore.
 
 ---
 
-## ⚙️ Internal Command Mapping
+### 🧠 Design Principles Summary
 
-```c
-init, i
-push, p
-watch, w
-link, l
-pull, pl
-sync, s
-clone, c
-branch, br
-checkout, co
-backup, b
-open, o
-version, v
-ignore, ig
-save, sv
-restore, re
-clean, cl
-undo, u
-amend, a
-reset, r
-current, cur
-doctor, dr
-```
+The semantic system follows three rules:
+
+* Do not expose Git internal mechanics
+* Commands express **intent, not steps**
+* Use human mental models (enter / pause / sync / rewind)
+
+---
+
+### ⚡ One-line Summary
+
+> gitAuto is not a Git shortcut tool.
+> It is a **natural intent mapping layer over Git workflows.**
 
 ---
 
@@ -228,15 +269,15 @@ watch_blacklist=.git/,build/
 
 Features:
 
-* Auto-generated if missing
+* Auto-generated
 * No restart required
-* Live applied in watch mode
+* Dynamically applied in watch mode
 
 ---
 
-## 🧱 .gitignore Management Strategy
+## 🧱 .gitignore Strategy
 
-gitAuto manages a safe isolated section:
+gitAuto manages a dedicated safe block:
 
 ```gitignore
 # >>> gitAuto
@@ -247,29 +288,29 @@ gitAuto manages a safe isolated section:
 
 Rules:
 
-* Does not modify user-defined rules
-* Prevents duplicate entries
-* Only edits managed block
+* Never modifies user-defined rules
+* No duplication
+* Only manages isolated section
 
 ---
 
 ## ⚠️ Output Levels
 
-* `[ERROR]` → Critical errors
-* `[WARN]` → Warnings
-* `[gitAuto]` → Tool status logs
-* `[git]` → Native Git output
+* `[ERROR]` → critical failures
+* `[WARN]` → warnings
+* `[gitAuto]` → tool logs
+* `[git]` → native Git output
 
 ---
 
 ## 🪟 Platform Support
 
 * Windows only
-* Based on Win32 file system watcher API
+* Built on Win32 file system watcher API
 
 ---
 
-## 🚧 Future Plans
+## 🚧 Future Roadmap
 
 * Linux / macOS support
 * Conflict resolution assistant

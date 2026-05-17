@@ -1,6 +1,6 @@
 <div align="center">
 
-# gitAuto - 轻量 Git 自动化工具
+# gitAuto - 轻量 & 直觉语义 Git 自动化工具
 
 <img src="https://img.shields.io/badge/gitauto-lightweight%20git%20automation-red?style=for-the-badge"/>
 
@@ -22,188 +22,221 @@
 
 ---
 
-## ⚡ 核心理念
+## ⚡ 极简使用！！！
 
-- 减少并简化重复 Git 操作
-- 默认安全（危险操作显式分级）
-- 保持 Git 行为可预测
-- 提供“更直觉”的命令语义
-- 自动化但不隐藏 Git 本质
+gitAuto 的**终极**设计目标：**让 Git 操作可以缩短到几乎“打字级别”**
+
+支持 alias 后，你可以用极短命令完成完整 workflow：
+
+```bash
+gitauto push      → ga p
+gitauto checkout  → ga co
+gitauto restore   → ga re
+gitauto branch    → ga br
+````
+
+甚至日常开发可以压缩为：
+
+```bash
+g p   # pull + commit + push
+g w   # 自动监听同步
+g u   # undo
+```
+
+👉 **让 Git 操作从“命令”变成“肌肉记忆”！！**
 
 ---
 
 ## 🚀 功能总览
+```
+gitauto init/i                         初始化仓库（init + add + commit + push）
+gitauto clone/c <url>                  克隆仓库并初始化工作流
+gitauto link/l <url>                   绑定远程仓库（设置 origin + fetch）
 
-#### 🧭 仓库与基础操作
+gitauto push/p                         智能推送（pull --rebase + add + commit + push）
+gitauto push/p -m <msg>                使用自定义提交信息
+gitauto push/p -f                      安全强制推送（--force-with-lease）
+gitauto push/p -ff                     危险强制推送（--force）
 
-| 命令 | 功能 |
-|------|------|
-| `gitauto init` | 初始化仓库 + 首次 commit + push + upstream |
-| `gitauto clone <url>` | 克隆仓库 |
-| `gitauto link <url>` | 绑定 origin 并 fetch |
-| `gitauto open` | 打开远程仓库页面 |
-| `gitauto version` | 查看 Git + gitAuto 版本 |
+gitauto pull/pl                        智能拉取（rebase + autostash）
+gitauto pull/pl -f                     强制同步（reset 到 origin/<branch>）
+gitauto pull/pl -ff                    完全重置（clean + hard reset）
 
----
+gitauto sync/s                         双向同步（pull + push）
 
-#### 🚀 推送与同步
+gitauto watch/w                        文件变动自动同步
+gitauto watch/w -q                     静默模式（最少输出）
 
-| 命令 | 功能 |
-|------|------|
-| `gitauto push` | 智能 push（pull + add + commit + push） |
-| `gitauto push -m "msg"` | 自定义 commit message |
-| `gitauto push -f` | 安全强推（--force-with-lease） |
-| `gitauto push -ff` | 危险强推（--force） |
-| `gitauto pull` | 智能 pull（rebase + autostash） |
-| `gitauto pull -f` | 强制对齐远程 |
-| `gitauto pull -ff` | 重置并清空本地 |
-| `gitauto sync` | pull + push 双向同步 |
+gitauto branch/br                      查看分支列表
+gitauto checkout/co <branch>           切换分支（不存在则自动创建）
 
----
+gitauto backup/b                       创建备份分支快照
+gitauto backup/b restore/re            从备份分支恢复
+gitauto backup/b restore/re <branch>   恢复指定分支快照
 
-#### 👀 自动化监听
+gitauto save/sv                        暂存工作区（stash push -u）
+gitauto save/sv -m <msg>               暂存并附带信息
 
-| 命令 | 功能 |
-|------|------|
-| `gitauto watch` | 文件监听自动同步 |
-| `gitauto watch -q` | 静默后台同步 |
+gitauto restore/re                     恢复最近一次暂存（pop）
+gitauto restore/re -a                  应用暂存（保留 stash）
+gitauto restore/re <N>                 按索引恢复暂存
+gitauto restore/re list/l              查看所有暂存记录
 
----
+gitauto clean/cl                       预览并清理未跟踪文件
+gitauto clean/cl -f                    强制清理未跟踪文件
+gitauto clean/cl -ff                   深度清理（包括 ignored 文件）
 
-#### 🌿 分支管理
+gitauto ignore/ig node                 添加 Node.js .gitignore 模板
+gitauto ignore/ig add <rule>           添加自定义 ignore 规则
 
-| 命令 | 功能 |
-|------|------|
-| `gitauto branch` | 分支列表 |
-| `gitauto checkout <branch>` | 切换分支（不存在则创建） |
-| `gitauto current` | 查看当前分支 |
+gitauto undo/u                         撤销最近一次提交（soft reset）
+gitauto undo/u mixed/m                 混合撤销（取消 staged）
+gitauto undo/u hard/h                  强制撤销（丢弃修改）
+gitauto undo/u <N>                     撤销最近 N 次提交
 
----
+gitauto amend/a                        修改最近一次提交
+gitauto amend -m <msg>                 修改提交信息
 
-#### 💾 stash / 工作区
+gitauto reset/r                        重置到 HEAD（强制）
+gitauto reset/r <N>                    回退 N 次提交
 
-| 命令 | 功能 |
-|------|------|
-| `gitauto save` | stash 保存 |
-| `gitauto save -m "msg"` | 带备注 stash |
-| `gitauto restore` | pop 最近 stash |
-| `gitauto restore -a` | apply stash |
-| `gitauto restore <N>` | 指定 stash 恢复 |
-| `gitauto restore list` | 查看 stash 列表 |
+gitauto current/cur                    查看当前分支
+gitauto open/o                         在浏览器打开远程仓库
+gitauto version/v                      查看版本信息
 
----
+gitauto doctor/dr                      诊断仓库问题
+gitauto doctor/dr -fix/-f              自动修复常见问题
+```
 
-#### 🧹 清理与重置
-
-| 命令 | 功能 |
-|------|------|
-| `gitauto clean` | 预览并清理未跟踪文件 |
-| `gitauto clean -f` | 强制清理 |
-| `gitauto clean -ff` | 清理 ignored + untracked |
-| `gitauto reset` | hard reset |
-| `gitauto reset <N>` | 回退 N 次 commit |
 
 ---
 
-#### ⏪ 撤销系统
-
-| 命令 | 功能 |
-|------|------|
-| `gitauto undo` | soft reset HEAD~1 |
-| `gitauto undo mixed` | mixed reset |
-| `gitauto undo hard` | hard reset |
-| `gitauto undo <N>` | 撤销 N 次 commit |
-
----
-
-#### 🧠 提交增强
-
-| 命令 | 功能 |
-|------|------|
-| `gitauto amend` | 修改最近 commit |
-| `gitauto amend -m` | 修改 commit message |
-
----
-
-#### 🧹 ignore 管理
-
-| 命令 | 功能 |
-|------|------|
-| `gitauto ignore node` | 写入 Node.js ignore 模板 |
-| `gitauto ignore add "<rule>"` | 添加 ignore 规则 |
-
----
-
-#### 🧪 仓库诊断
-
-| 命令 | 功能 |
-|------|------|
-| `gitauto doctor` | 仓库健康检查 |
-| `gitauto doctor -f` | 自动修复模式 |
-
----
 
 ## 🧠 命令设计哲学
 
-### push = 自动同步模型
+### ⚡ 直觉语义系统（Intuitive Command Design）
+
+gitAuto 的核心设计不是“简化 Git 命令”，而是：
+
+> **用自然行为映射替代 Git 语法记忆**
+
+---
+
+### 🚀 push = “把当前状态同步出去”
 
 ```bash
 gitauto push
-↓
-pull --rebase --autostash
-add .
-commit
-push
-````
+```
+
+不再是：
+
+* add？
+* commit？
+* pull？
+* rebase？
+
+而是一个统一语义：
+
+> **“我现在要把本地状态同步到远端”**
+
+因此 push 自动完成整个同步链路。
 
 ---
 
-### watch = 自动开发循环
+### 🌿 checkout = “切换到某个状态”
+
+```bash
+gitauto checkout <branch>
+```
+
+语义不是：
+
+* git checkout
+* git switch
+* git branch -b
+
+而是：
+
+> **“我想进入这个分支的工作状态”**
+
+如果不存在 → 自动创建
+因为“进入一个状态”本身就可以被推断为“存在即切换，不存在即创建”
+
+---
+
+### 💾 save / restore = “暂停与恢复当前状态”
+
+```bash
+gitauto save
+gitauto restore
+```
+
+不是 stash 的抽象概念，而是：
+
+> **save = 暂停当前工作**
+> **restore = 回到刚才的工作状态**
+
+用户不需要知道 stash 机制，只需要理解：
+
+* 暂停
+* 恢复
+
+---
+
+### ⏪ undo = “撤销程度，而不是 Git 参数”
 
 ```text
-文件变动
-→ 自动 commit
-→ 自动 push
-→ 继续监听
+undo
+undo mixed
+undo hard
 ```
+
+语义模型是：
+
+> 不是 reset 参数差异
+> 而是“我要撤销到什么程度”
+
+* soft → 还想保留
+* mixed → 回到修改状态
+* hard → 彻底不要了
+
+👉 用户思考的是“意图”，不是 Git 行为模型
 
 ---
 
-### undo = Git 时间回退系统
+### 👀 watch = “进入自动工作模式”
 
-```text
-soft   → 保留 staged
-mixed  → 取消 staged
-hard   → 全部丢弃
+```bash
+gitauto watch
 ```
+
+不是“监听文件变化”，而是：
+
+> **进入持续同步状态**
+
+行为被抽象为：
+
+* 我进入 watch 模式
+* 系统负责同步
+
+而不是用户负责每一步 Git 操作
 
 ---
 
-## ⚙️ GitAuto 内部命令映射
+### 🧠 设计本质总结
 
-```c
-init, i
-push, p
-watch, w
-link, l
-pull, pl
-sync, s
-clone, c
-branch, br
-checkout, co
-backup, b
-open, o
-version, v
-ignore, ig
-save, sv
-restore, re
-clean, cl
-undo, u
-amend, a
-reset, r
-current, cur
-doctor, dr
-```
+gitAuto 的语义系统遵循三条规则：
+
+* 不暴露 Git 内部模型
+* 命令表达“意图”而不是“步骤”
+* 默认用人类行为语言建模（进入 / 暂停 / 同步 / 撤销）
+
+---
+
+### ⚡ 一句话总结
+
+> gitAuto 不是 Git 快捷键工具。  
+> 它是一个 **用于表示 Git 意图的自然语言映射层**。
 
 ---
 
