@@ -2,7 +2,6 @@
 
 # gitAuto - 轻量 Git 自动化工具
 
-
 <img src="https://img.shields.io/badge/gitauto-lightweight%20git%20automation-red?style=for-the-badge"/>
 
 <br/>
@@ -14,183 +13,201 @@
 <img src="https://img.shields.io/badge/license-MIT-green"/>
 
 </div>
-<br>
 
-`gitAuto` 是一个 **轻量级 Git 自动化命令行工具（仅 Windows）**
-用于简化 Git 中重复的提交、拉取、推送、分支管理等操作。
+<br/>
 
-它不会取代 Git，而是对 Git 的高频操作进行封装与增强。
+`gitAuto` 是一个 **轻量级 Git 自动化 CLI 工具（Windows only）**
 
----
-
-## ✨ 功能状态总览
-
-> ✔ = 已实现
-> ⏳ = 计划中 / 未实现
-
-| 状态 | 命令                   | 功能                                 |
-| -- | -------------------- | ---------------------------------- |
-| ✔  | `gitauto init`       | 初始化仓库并首次提交推送                       |
-| ✔  | `gitauto link <url>` | 绑定远程仓库并 fetch                      |
-| ✔  | `gitauto push`       | 智能推送（rebase + add + commit + push） |
-| ✔  | `gitauto push -m`    | 自定义提交信息                            |
-| ✔  | `gitauto push -f`    | 安全强制推送（--force-with-lease）         |
-| ✔  | `gitauto push -ff`   | 强制覆盖推送（危险操作）                       |
-| ✔  | `gitauto pull`       | 智能拉取（rebase + autostash）           |
-| ✔  | `gitauto pull -f`    | 强制同步远程                             |
-| ✔  | `gitauto pull -ff`   | 完全重置仓库                             |
-| ✔  | `gitauto watch`      | 文件变动自动同步                           |
-| ✔  | `gitauto watch -q`   | 静默自动同步模式                           |
-| ✔  | `gitauto sync`       | 拉取 + 推送同步                          |
-
-| 状态 | 命令                          | 功能             |
-| -- | --------------------------- | -------------- |
-| ⏳  | `gitauto clone <url>`       | 克隆仓库并自动初始化     |
-| ⏳  | `gitauto status`            | 美化 Git 状态输出    |
-| ⏳  | `gitauto status --short`    | 简洁状态输出         |
-| ⏳  | `gitauto log`               | 美化 commit 历史   |
-| ⏳  | `gitauto branch`            | 分支信息美化展示       |
-| ⏳  | `gitauto checkout <branch>` | 智能切换分支（不存在则创建） |
-| ⏳  | `gitauto backup`            | 快速备份提交         |
-| ⏳  | `gitauto save`              | stash 快捷保存     |
-| ⏳  | `gitauto restore`           | 恢复 stash       |
-| ⏳  | `gitauto ignore <rule>`     | 快速添加 ignore 规则 |
-| ⏳  | `gitauto doctor`            | 仓库健康检查         |
-| ⏳  | `gitauto clean`             | 清理未跟踪文件        |
-| ⏳  | `gitauto undo`              | 撤销最近一次提交       |
-| ⏳  | `gitauto amend`             | 修改最近提交         |
-| ⏳  | `gitauto reset`             | 强制重置到 HEAD     |
-| ⏳  | `gitauto current`           | 查看当前分支         |
-| ⏳  | `gitauto changed`           | 查看变更文件         |
-| ⏳  | `gitauto open`              | 打开远程仓库         |
-| ⏳  | `gitauto version`           | 查看版本信息         |
+它不会替代 Git，而是对高频 Git 操作进行“极简封装 + 自动化增强”，让日常开发更快、更少思考。
 
 ---
 
-## 🚀 设计理念
+## ⚡ 核心理念
 
-* 减少重复 Git 操作
-* 保持 Git 行为可预测
-* 默认安全，危险操作需要确认
-* 自动化，但不“替代 Git”
-
----
-
-## 🚀 使用方法
-
-### 查看帮助
-
-```bash
-gitauto
-```
+- 减少并简化重复 Git 操作
+- 默认安全（危险操作显式分级）
+- 保持 Git 行为可预测
+- 提供“更直觉”的命令语义
+- 自动化但不隐藏 Git 本质
 
 ---
 
-### 初始化仓库
+## 🚀 功能总览
 
-```bash
-gitauto init
-```
+#### 🧭 仓库与基础操作
 
-行为：
-
-* 如果当前目录不是 Git 仓库，则自动初始化
-* 执行首次 commit + push
-* 自动设置 upstream 分支
-* 生成 `.git/gitauto.conf`
+| 命令 | 功能 |
+|------|------|
+| `gitauto init` | 初始化仓库 + 首次 commit + push + upstream |
+| `gitauto clone <url>` | 克隆仓库 |
+| `gitauto link <url>` | 绑定 origin 并 fetch |
+| `gitauto open` | 打开远程仓库页面 |
+| `gitauto version` | 查看 Git + gitAuto 版本 |
 
 ---
 
-### 智能推送
+#### 🚀 推送与同步
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto push` | 智能 push（pull + add + commit + push） |
+| `gitauto push -m "msg"` | 自定义 commit message |
+| `gitauto push -f` | 安全强推（--force-with-lease） |
+| `gitauto push -ff` | 危险强推（--force） |
+| `gitauto pull` | 智能 pull（rebase + autostash） |
+| `gitauto pull -f` | 强制对齐远程 |
+| `gitauto pull -ff` | 重置并清空本地 |
+| `gitauto sync` | pull + push 双向同步 |
+
+---
+
+#### 👀 自动化监听
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto watch` | 文件监听自动同步 |
+| `gitauto watch -q` | 静默后台同步 |
+
+---
+
+#### 🌿 分支管理
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto branch` | 分支列表 |
+| `gitauto checkout <branch>` | 切换分支（不存在则创建） |
+| `gitauto current` | 查看当前分支 |
+
+---
+
+#### 💾 stash / 工作区
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto save` | stash 保存 |
+| `gitauto save -m "msg"` | 带备注 stash |
+| `gitauto restore` | pop 最近 stash |
+| `gitauto restore -a` | apply stash |
+| `gitauto restore <N>` | 指定 stash 恢复 |
+| `gitauto restore list` | 查看 stash 列表 |
+
+---
+
+#### 🧹 清理与重置
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto clean` | 预览并清理未跟踪文件 |
+| `gitauto clean -f` | 强制清理 |
+| `gitauto clean -ff` | 清理 ignored + untracked |
+| `gitauto reset` | hard reset |
+| `gitauto reset <N>` | 回退 N 次 commit |
+
+---
+
+#### ⏪ 撤销系统
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto undo` | soft reset HEAD~1 |
+| `gitauto undo mixed` | mixed reset |
+| `gitauto undo hard` | hard reset |
+| `gitauto undo <N>` | 撤销 N 次 commit |
+
+---
+
+#### 🧠 提交增强
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto amend` | 修改最近 commit |
+| `gitauto amend -m` | 修改 commit message |
+
+---
+
+#### 🧹 ignore 管理
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto ignore node` | 写入 Node.js ignore 模板 |
+| `gitauto ignore add "<rule>"` | 添加 ignore 规则 |
+
+---
+
+#### 🧪 仓库诊断
+
+| 命令 | 功能 |
+|------|------|
+| `gitauto doctor` | 仓库健康检查 |
+| `gitauto doctor -f` | 自动修复模式 |
+
+---
+
+## 🧠 命令设计哲学
+
+### push = 自动同步模型
 
 ```bash
 gitauto push
-```
+↓
+pull --rebase --autostash
+add .
+commit
+push
+````
 
-等价于：
+---
 
-```bash
-git pull --rebase --autostash
-git add .
-git commit
-git push
+### watch = 自动开发循环
+
+```text
+文件变动
+→ 自动 commit
+→ 自动 push
+→ 继续监听
 ```
 
 ---
 
-### 自定义提交信息
+### undo = Git 时间回退系统
 
-```bash
-gitauto push -m "提交信息"
+```text
+soft   → 保留 staged
+mixed  → 取消 staged
+hard   → 全部丢弃
 ```
 
 ---
 
-### 强制推送
+## ⚙️ GitAuto 内部命令映射
 
-```bash
-gitauto push -f
-gitauto push -ff
-```
-
-* `-f`：安全强制推送（--force-with-lease）
-* `-ff`：危险强制推送（--force）
-
----
-
-### 智能拉取
-
-```bash
-gitauto pull
-```
-
----
-
-### 强制同步
-
-```bash
-gitauto pull -f
-gitauto pull -ff
-```
-
-* `-f`：重置为远程版本
-* `-ff`：清理 + 重置（完全丢弃本地修改）
-
----
-
-### 自动监听模式
-
-```bash
-gitauto watch
-gitauto watch -q
-```
-
-流程：
-
-1. 启动时执行一次 pull
-2. 进入文件监听状态
-3. 检测文件变化
-4. 倒计时
-5. 自动 commit + push
-6. 回到监听状态
-
----
-
-### 同步模式
-
-```bash
-gitauto sync
-```
-
-执行：
-
-```bash
-git pull --rebase && git push
+```c
+init, i
+push, p
+watch, w
+link, l
+pull, pl
+sync, s
+clone, c
+branch, br
+checkout, co
+backup, b
+open, o
+version, v
+ignore, ig
+save, sv
+restore, re
+clean, cl
+undo, u
+amend, a
+reset, r
+current, cur
+doctor, dr
 ```
 
 ---
 
-## ⚙️ 配置文件
+## 📁 配置系统
 
 路径：
 
@@ -206,59 +223,57 @@ watch_whitelist=src/,include/
 watch_blacklist=.git/,build/
 ```
 
-说明：
+特点：
 
-* 文件不存在时自动生成
-* 修改后即时生效，无需重启
+* 自动生成
+* 无需重启生效
+* watch 模式可配置
 
 ---
 
-## 📁 .gitignore 管理策略
+## 🧱 .gitignore 管理策略
 
-gitAuto 会维护 `.gitignore` 中的独立区域：
+gitAuto 使用安全分区：
 
 ```gitignore
 # >>> gitAuto
-/build/
 /node_modules/
+/build/
 # <<< gitAuto
 ```
 
 规则：
 
+* 不污染用户原有规则
 * 不重复写入
-* 不影响用户原有规则
-* 只操作标记区域
+* 仅管理标记区块
 
 ---
 
-## ⚠️ 输出等级说明
+## ⚠️ 输出等级
 
-* `[ERROR]`：严重错误（如非 Git 仓库、push 失败）
-* `[WARN]`：警告信息（不影响流程）
-* `[gitAuto]`：工具自身状态输出
-* `[git]`：原生 Git 输出（可在 quiet 模式隐藏）
+* `[ERROR]`：严重错误
+* `[WARN]`：警告信息
+* `[gitAuto]`：工具状态
+* `[git]`：原生 Git 输出
 
 ---
 
 ## 🪟 平台支持
 
-* Windows only（基于 Win32 文件监听 API）
+* Windows only
+* 基于 Win32 文件监听 API
+
+---
+
+## 🚧 未来计划
+
+* Linux / macOS 支持
+* 冲突自动辅助解决
+* 一键安装与自动更新
 
 ---
 
 ## 📜 License
 
 MIT License
-
----
-
-## 🚧 开发中功能
-
-未来计划：
-
-* 可视化 Git 历史查看
-* 交互式分支管理 UI
-* 冲突解决辅助工具
-* Linux / macOS 支持
-* 插件系统（自定义 workflow 扩展）
