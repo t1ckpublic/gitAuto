@@ -1,6 +1,6 @@
 <div align="center">
 
-# gitAuto - Lightweight git Automation Tool
+# gitAuto - Lightweight & Intuitive Semantic Git Automation Tool
 #### [中文README](README_ZH.md)
 
 <img src="https://img.shields.io/badge/gitauto-lightweight%20git%20automation-red?style=for-the-badge"/>
