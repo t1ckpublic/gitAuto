@@ -130,4 +130,7 @@ int cmd_reset(int argc, char **argv);
 /* current */
 int cmd_current(int argc, char **argv);
 
+/* doctor */
+int cmd_doctor(int argc, char **argv);
+
 #endif

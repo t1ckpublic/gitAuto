@@ -31,6 +31,7 @@ SRC = \
     src/feature/amend.c \
     src/feature/reset.c \
     src/feature/current.c \
+    src/feature/doctor.c \
     src/utils/env.c
 
 all: $(OUT) $(ALIAS)
