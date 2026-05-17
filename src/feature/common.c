@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <time.h>
 
 /* global variables */
@@ -127,12 +128,53 @@ void load_config(Config *cfg) {
 
 /* ---------------- gitignore ---------------- */
 
+bool git_get_root(char *out, size_t size) {
+
+    FILE *fp = popen(
+        "git rev-parse --show-toplevel 2>nul",
+        "r"
+    );
+
+    if (!fp)
+        return false;
+
+    if (!fgets(out, (int)size, fp)) {
+        pclose(fp);
+        return false;
+    }
+
+    pclose(fp);
+
+    /* 去掉换行 */
+    out[strcspn(out, "\r\n")] = 0;
+
+    return true;
+}
+
 void ensure_gitignore(void) {
 
-    FILE *f = fopen(GITIGNORE_PATH, "r");
+    char root[1024];
+
+    /* 获取仓库根目录 */
+    if (!git_get_root(root, sizeof(root)))
+        return;
+
+    char gitignore[1200];
+
+    snprintf(
+        gitignore,
+        sizeof(gitignore),
+        "%s/.gitignore",
+        root
+    );
+
+    FILE *f = fopen(gitignore, "r");
+
+    /* 已存在时检查是否已经注入 */
     if (f) {
 
         char buf[1024];
+
         while (fgets(buf, sizeof(buf), f)) {
 
             if (strstr(buf, ">>> gitAuto")) {
@@ -144,10 +186,13 @@ void ensure_gitignore(void) {
         fclose(f);
     }
 
-    f = fopen(GITIGNORE_PATH, "a");
-    if (!f) return;
+    /* 追加写入 */
+    f = fopen(gitignore, "a");
+    if (!f)
+        return;
 
-    fprintf(f,
+    fprintf(
+        f,
         "\n# >>> gitAuto\n"
         "# core\n"
         "gitAuto.exe\n"
@@ -155,27 +200,8 @@ void ensure_gitignore(void) {
         "# templates\n"
         "# (managed by gitauto ignore)\n"
         "\n"
-        "# <<< gitAuto\n");
+        "# <<< gitAuto\n"
+    );
 
     fclose(f);
 }
-// void ensure_gitignore(void) {
-//     FILE *f = fopen(GITIGNORE_PATH, "r");
-//     if (f) {
-//         char buf[1024];
-//         while (fgets(buf, sizeof(buf), f)) {
-//             if (strstr(buf, ">>> gitAuto")) {
-//                 fclose(f);
-//                 return;
-//             }
-//         }
-//         fclose(f);
-//     }
-
-//     f = fopen(GITIGNORE_PATH, "a");
-//     fprintf(f,
-//         "\n# >>> gitAuto\n"
-//         "gitAuto.exe\n"
-//         "# <<< gitAuto\n");
-//     fclose(f);
-// }
