@@ -246,7 +246,7 @@ The semantic system follows three rules:
 
 ### ⚡ One-line Summary
 
-> gitAuto is not a Git shortcut tool.
+> gitAuto is not a Git shortcut tool.  
 > It is a **natural intent mapping layer over Git workflows.**
 
 ---
