@@ -124,4 +124,10 @@ int cmd_undo(int argc, char **argv);
 /* amend */
 int cmd_amend(int argc, char **argv);
 
+/* reset */
+int cmd_reset(int argc, char **argv);
+
+/* current */
+int cmd_current(int argc, char **argv);
+
 #endif

@@ -44,15 +44,20 @@ static int get_current_branch(char *buf, size_t size) {
 
 static bool has_working_changes(void) {
 
-    int ret1 = system(
-        "git diff --quiet >nul 2>nul"
+    FILE *fp = popen(
+        "git status --porcelain",
+        "r"
     );
 
-    int ret2 = system(
-        "git diff --cached --quiet >nul 2>nul"
-    );
+    if (!fp) {
+        return false;
+    }
 
-    return ret1 != 0 || ret2 != 0;
+    int ch = fgetc(fp);
+
+    pclose(fp);
+
+    return ch != EOF;
 }
 
 /* ---------------- commit ---------------- */

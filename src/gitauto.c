@@ -36,6 +36,8 @@ static Command commands[] = {
     {"clean", "cl", cmd_clean},
     {"undo", "u", cmd_undo},
     {"amend", "a", cmd_amend},
+    {"reset", "r", cmd_reset},
+    {"current", "cur", cmd_current},
     {NULL, NULL, NULL}  /* sentinel */
 };
 
