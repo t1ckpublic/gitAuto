@@ -8,24 +8,55 @@
 #define popen  _popen
 #define pclose _pclose
 
+/* ---------------- colors ---------------- */
+
+#define CLR_RESET  "\x1b[0m"
+#define CLR_RED    "\x1b[31m"
+#define CLR_GREEN  "\x1b[32m"
+#define CLR_YELLOW "\x1b[33m"
+
 /* ---------------- model ---------------- */
 
 typedef struct {
     char name[256];
-    char status[16];
-} BranchItem;
+    int is_current;
+} LocalBranch;
 
-/* ---------------- utils ---------------- */
+typedef struct {
+    char name[256]; // origin/xxx
+} RemoteBranch;
 
-static int max_int(int a, int b) {
-    return a > b ? a : b;
+typedef struct {
+    char local[256];   // xxx
+    char remote[256];  // origin/xxx
+
+    int is_local;
+    int is_remote;
+    int is_current;
+} BranchView;
+
+/* ---------------- trim ---------------- */
+
+static const char* trim(char *s) {
+    while (*s == ' ' || *s == '\t') s++;
+
+    char *end = s + strlen(s);
+    while (end > s &&
+          (*(end - 1) == ' ' ||
+           *(end - 1) == '\t' ||
+           *(end - 1) == '\r' ||
+           *(end - 1) == '\n')) {
+        *(--end) = 0;
+    }
+
+    return s;
 }
 
-/* ---------------- collect ---------------- */
+/* ---------------- local ---------------- */
 
-static int collect_branches(BranchItem *items, int max_items, int *count) {
+static int collect_local(LocalBranch *list, int *count) {
 
-    FILE *fp = popen("git branch -a", "r");
+    FILE *fp = popen("git branch", "r");
     if (!fp) return 1;
 
     char line[256];
@@ -33,48 +64,19 @@ static int collect_branches(BranchItem *items, int max_items, int *count) {
 
     while (fgets(line, sizeof(line), fp)) {
 
-        if (*count >= max_items) break;
+        if (*count >= 128) break;
 
-        line[strcspn(line, "\r\n")] = 0;
+        char *clean = (char*)trim(line);
 
-        BranchItem *it = &items[*count];
-        memset(it, 0, sizeof(*it));
+        LocalBranch *b = &list[*count];
+        memset(b, 0, sizeof(*b));
 
-        /* ---------------- remove HEAD symbolic ref ---------------- */
-        if (strstr(line, "HEAD ->")) {
-            continue;
+        if (clean[0] == '*') {
+            b->is_current = 1;
+            snprintf(b->name, sizeof(b->name), "%s", clean + 2);
+        } else {
+            snprintf(b->name, sizeof(b->name), "%s", clean);
         }
-
-        /* ---------------- current branch ---------------- */
-        if (line[0] == '*') {
-            snprintf(it->name, sizeof(it->name), "%s", line + 2);
-            strcpy(it->status, "current");
-            (*count)++;
-            continue;
-        }
-
-        /* ---------------- remote branches ---------------- */
-        if (strstr(line, "remotes/")) {
-
-            const char *p = strstr(line, "remotes/");
-            p += strlen("remotes/");
-
-            /* origin/main -> main */
-            const char *slash = strchr(p, '/');
-            if (slash) {
-                snprintf(it->name, sizeof(it->name), "%s", slash + 1);
-            } else {
-                snprintf(it->name, sizeof(it->name), "%s", p);
-            }
-
-            strcpy(it->status, "remote");
-            (*count)++;
-            continue;
-        }
-
-        /* ---------------- local branches ---------------- */
-        snprintf(it->name, sizeof(it->name), "%s", line);
-        strcpy(it->status, "local");
 
         (*count)++;
     }
@@ -83,77 +85,185 @@ static int collect_branches(BranchItem *items, int max_items, int *count) {
     return 0;
 }
 
-/* ---------------- draw helpers ---------------- */
+/* ---------------- remote ---------------- */
 
-static void draw_line(int name_w, int status_w) {
-    printf("┌");
-    for (int i = 0; i < name_w + 2; i++) printf("─");
-    printf("┬");
-    for (int i = 0; i < status_w + 2; i++) printf("─");
-    printf("┐\n");
+static int collect_remote(RemoteBranch *list, int *count) {
+
+    FILE *fp = popen("git branch -r", "r");
+    if (!fp) return 1;
+
+    char line[256];
+    *count = 0;
+
+    while (fgets(line, sizeof(line), fp)) {
+
+        if (*count >= 128) break;
+        if (strstr(line, "->")) continue;
+
+        char *clean = (char*)trim(line);
+
+        RemoteBranch *b = &list[*count];
+        snprintf(b->name, sizeof(b->name), "%s", clean);
+
+        (*count)++;
+    }
+
+    pclose(fp);
+    return 0;
 }
 
-static void draw_sep(int name_w, int status_w) {
-    printf("├");
-    for (int i = 0; i < name_w + 2; i++) printf("─");
-    printf("┼");
-    for (int i = 0; i < status_w + 2; i++) printf("─");
-    printf("┤\n");
+/* ---------------- status safety ---------------- */
+
+static int ref_exists(const char *ref) {
+
+    if (!ref || !ref[0]) return 0;
+
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd),
+        "git rev-parse --verify %s >nul 2>nul",
+        ref
+    );
+
+    return system(cmd) == 0;
 }
 
-static void draw_bottom(int name_w, int status_w) {
-    printf("└");
-    for (int i = 0; i < name_w + 2; i++) printf("─");
-    printf("┴");
-    for (int i = 0; i < status_w + 2; i++) printf("─");
-    printf("┘\n");
+/* ---------------- status ---------------- */
+
+static const char* get_status(const char *local, const char *remote) {
+
+    if (!local && remote) return "remote only";
+    if (local && !remote) return "local only";
+    if (!local && !remote) return "unknown";
+
+    if (!ref_exists(local) || !ref_exists(remote)) {
+        return "unknown";
+    }
+
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd),
+        "git rev-list --left-right --count %s...%s",
+        local,
+        remote
+    );
+
+    FILE *fp = popen(cmd, "r");
+    if (!fp) return "unknown";
+
+    int a = 0, b = 0;
+    fscanf(fp, "%d %d", &a, &b);
+    pclose(fp);
+
+    if (a == 0 && b == 0) return "synced";
+    if (a > 0 && b == 0) return "ahead";
+    if (a == 0 && b > 0) return "behind";
+    return "diverged";
 }
 
-/* ---------------- branch ---------------- */
+/* ---------------- main ---------------- */
 
 int gitauto_branch(bool quiet) {
-
+    git_run("git fetch --all --prune", true);
     (void)quiet;
 
-    BranchItem items[128];
-    int count = 0;
+    LocalBranch locals[128];
+    RemoteBranch remotes[128];
+    BranchView views[256];
 
-    if (collect_branches(items, 128, &count) != 0) {
-        log_error("failed to get branches");
+    int lcount = 0, rcount = 0, vcount = 0;
+
+    if (collect_local(locals, &lcount) != 0) {
+        log_error("failed to get local branches");
         return 1;
     }
 
-    int name_w = (int)strlen("Branch");
-    int status_w = (int)strlen("Status");
-
-    for (int i = 0; i < count; i++) {
-        name_w = max_int(name_w, (int)strlen(items[i].name));
-        status_w = max_int(status_w, (int)strlen(items[i].status));
+    if (collect_remote(remotes, &rcount) != 0) {
+        log_error("failed to get remote branches");
+        return 1;
     }
 
-    /* ---------------- header ---------------- */
+    /* ---------------- build views (local first) ---------------- */
 
-    draw_line(name_w, status_w);
+    for (int i = 0; i < lcount; i++) {
 
-    printf("│ %-*s │ %-*s │\n",
-           name_w, "Branch",
-           status_w, "Status");
+        BranchView *v = &views[vcount++];
+        memset(v, 0, sizeof(*v));
 
-    draw_sep(name_w, status_w);
+        snprintf(v->local, sizeof(v->local), "%s", locals[i].name);
+        v->is_local = 1;
 
-    /* ---------------- rows ---------------- */
-
-    for (int i = 0; i < count; i++) {
-        printf("│ %-*s │ %-*s │\n",
-               name_w,
-               items[i].name,
-               status_w,
-               items[i].status);
+        if (locals[i].is_current) {
+            v->is_current = 1;
+        }
     }
 
-    /* ---------------- footer ---------------- */
+    /* ---------------- merge remote ---------------- */
 
-    draw_bottom(name_w, status_w);
+    for (int i = 0; i < rcount; i++) {
+
+        const char *r = remotes[i].name;
+        const char *name = strrchr(r, '/');
+        name = name ? name + 1 : r;
+
+        int found = 0;
+
+        for (int j = 0; j < vcount; j++) {
+
+            if (views[j].is_local &&
+                strcmp(views[j].local, name) == 0) {
+
+                snprintf(views[j].remote, sizeof(views[j].remote), "%s", r);
+                views[j].is_remote = 1;
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+
+            BranchView *v = &views[vcount++];
+            memset(v, 0, sizeof(*v));
+
+            snprintf(v->remote, sizeof(v->remote), "%s", r);
+            v->is_remote = 1;
+        }
+    }
+
+    /* ---------------- print ---------------- */
+
+    printf(
+        "Local                     Remote                   Status\n"
+        "---------------------------------------------------------------\n"
+    );
+
+    for (int i = 0; i < vcount; i++) {
+
+        const char *local  = views[i].is_local  ? views[i].local  : NULL;
+        const char *remote = views[i].is_remote ? views[i].remote : NULL;
+
+        const char *status = get_status(local, remote);
+
+        const char *color = CLR_RESET;
+
+        if (!strcmp(status, "synced") || !strcmp(status, "ahead")) {
+            color = CLR_GREEN;
+        }
+        else if (!strcmp(status, "behind") || !strcmp(status, "diverged")) {
+            color = CLR_YELLOW;
+        }
+        else {
+            color = CLR_RED;
+        }
+
+        printf(
+            "%c %-24s %-24s %s%s%s\n",
+            views[i].is_current ? '*' : ' ',
+            local  ? local  : "Does not exist",
+            remote ? remote : "Does not exist",
+            color,
+            status,
+            CLR_RESET
+        );
+    }
 
     return 0;
 }
@@ -162,14 +272,7 @@ int gitauto_branch(bool quiet) {
 
 int cmd_branch(int argc, char **argv) {
 
-    bool quiet = false;
-
-    for (int i = 2; i < argc; i++) {
-        if (!strcmp(argv[i], "-q") ||
-            !strcmp(argv[i], "--quiet")) {
-            quiet = true;
-        }
-    }
+    (void)argv;
 
     if (!is_git_repo()) {
         log_error("not a git repository");
@@ -179,5 +282,5 @@ int cmd_branch(int argc, char **argv) {
     ensure_config();
     load_config(&g_cfg);
 
-    return gitauto_branch(quiet);
+    return gitauto_branch(false);
 }
